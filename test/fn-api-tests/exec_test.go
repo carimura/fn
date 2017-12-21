@@ -237,7 +237,6 @@ func TestRouteExecutions(t *testing.T) {
 	})
 
 	t.Run("exec-multi-log-test", func(t *testing.T) {
-		t.Skip("API changed. Needs to be fixed.")
 		t.Parallel()
 		s := SetupDefaultSuite()
 		routePath := "/multi-log"
@@ -314,8 +313,6 @@ func TestRouteExecutions(t *testing.T) {
 	})
 
 	t.Run("exec-log-test", func(t *testing.T) {
-		//XXX: Fix this test.
-		t.Skip("API changed. Needs to be fixed.")
 		t.Parallel()
 		s := SetupDefaultSuite()
 		routePath := "/log"
@@ -356,7 +353,6 @@ func TestRouteExecutions(t *testing.T) {
 
 	t.Run("exec-oversized-log-test", func(t *testing.T) {
 		t.Parallel()
-		t.Skip("API changed. Needs to be fixed.")
 
 		s := SetupDefaultSuite()
 		routePath := "/log"
@@ -379,7 +375,7 @@ func TestRouteExecutions(t *testing.T) {
 		}{Size: size}) //exceeding log by 1 symbol
 
 		callID := CallAsync(t, u, content)
-		time.Sleep(5 * time.Second)
+		time.Sleep(10 * time.Second)
 
 		cfg := &operations.GetAppsAppCallsCallLogParams{
 			Call:    callID,
