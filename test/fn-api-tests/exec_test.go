@@ -12,6 +12,7 @@ import (
 
 	"github.com/fnproject/fn_go/client/call"
 	"github.com/fnproject/fn_go/client/operations"
+	"net/http"
 )
 
 type ErrMsg struct {
@@ -346,6 +347,26 @@ func TestRouteExecutions(t *testing.T) {
 
 		if err != nil {
 			t.Errorf("Unexpected error: %s", err)
+		}
+
+		// regression part
+		JSONlogURL := url.URL{
+			Scheme: "http",
+			Host:   Host(),
+		}
+
+		JSONlogURL.Path = path.Join(JSONlogURL.Path, "v1", "apps", s.AppName, "calls", callID, "log")
+		req, err := http.NewRequest("GET", JSONlogURL.String(), nil)
+		if err != nil {
+			t.Error(err.Error())
+		}
+		req.Header.Set("Accept", "application/json")
+		resp, err := http.DefaultClient.Do(req)
+		if err != nil {
+			t.Error(err.Error())
+		}
+		if resp.StatusCode != 200 {
+			t.Errorf("API should return HTTP 200 OK, but have: %v", resp.StatusCode)
 		}
 
 		DeleteApp(t, s.Context, s.Client, s.AppName)
