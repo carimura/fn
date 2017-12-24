@@ -1,24 +1,9 @@
 #!/bin/bash
 set -exuo pipefail
 
-function host {
-    case ${DOCKER_LOCATION:-localhost} in
-    localhost)
-        echo "localhost"
-        ;;
-    docker_ip)
-        if [[ !  -z  ${DOCKER_HOST}  ]]
-        then
-            DOCKER_IP=`echo ${DOCKER_HOST} | awk -F/ '{print $3}'| awk -F: '{print $1}'`
-        fi
+source ./helpers.sh
 
-        echo ${DOCKER_IP}
-        ;;
-    container_ip)
-        echo "$(docker inspect -f '{{.NetworkSettings.IPAddress}}' ${1})"
-        ;;
-    esac
-}
+remove_containers
 
 case "$1" in
     "sqlite3" )
@@ -41,7 +26,7 @@ case "$1" in
     "postgres" )
     DB_CONTAINER="func-postgres-test"
     docker rm -fv ${DB_CONTAINER} || echo No prev test db container
-    docker run --name ${DB_CONTAINER} -e "POSTGRES_DB=funcs" -e "POSTGRES_PASSWORD=root"  -p 5432:5432 -d postgres
+    docker run --name ${DB_CONTAINER} -e "POSTGRES_DB=funcs" -e "POSTGRES_PASSWORD=root"  -p 5432:5432 -d postgres:9.3-alpine
     sleep 15
     POSTGRES_HOST=`host ${DB_CONTAINER}`
     POSTGRES_PORT=5432
@@ -51,3 +36,5 @@ case "$1" in
 esac
 
 cd test/fn-api-tests && FN_API_URL="http://localhost:8080"  FN_DB_URL=${FN_DB_URL} go test -v  -parallel ${2:-1} ./...; cd ../../
+
+remove_containers
